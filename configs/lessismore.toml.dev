@@ -1,0 +1,10 @@
+ListenAddr = ":8888"
+
+[log]
+level = "debug"
+dir = "./logs"
+file = "lessismore.log"
+maxbackups = 3
+maxsize = 1024
+maxage = 30
+compress = true
