@@ -11,6 +11,6 @@ const (
 	CHAN_SEND_BUF_SIZE       = 16
 	PONG_WAIT                = 70 * time.Second
 	PING_PERIOD              = 60 * time.Second
-	CONFIG_FILE              = "./lessismore.toml"
-	DOTENV_FILE              = "./.lessismore.env"
+	CONFIG_FILE              = "./configs/lessismore.toml"
+	DOTENV_FILE              = "./configs/.lessismore.env"
 )
