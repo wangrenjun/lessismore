@@ -5,35 +5,35 @@ import (
 )
 
 type ClientPool struct {
-	Clients *sync.Map
+	clients *sync.Map
 }
 
 func NewClientPool() *ClientPool {
 	return &ClientPool{
-		Clients: new(sync.Map),
+		clients: new(sync.Map),
 	}
 }
 
 func (self *ClientPool) Exist(key string) bool {
-	_, hit := self.Clients.Load(key)
+	_, hit := self.clients.Load(key)
 	return hit
 }
 
 func (self *ClientPool) Push(key string, c *Client) {
-	self.Clients.Store(key, c)
+	self.clients.Store(key, c)
 }
 
 func (self *ClientPool) Pull(key string) (c *Client, hit bool) {
-	v, hit := self.Clients.Load(key)
+	v, hit := self.clients.Load(key)
 	if hit {
-		self.Clients.Delete(key)
+		self.clients.Delete(key)
+		c = v.(*Client)
 	}
-	c = v.(*Client)
 	return
 }
 
 func (self *ClientPool) SendOne(key string, packet []byte) bool {
-	v, hit := self.Clients.Load(key)
+	v, hit := self.clients.Load(key)
 	if hit {
 		v.(*Client).Sendch <- packet
 	}
@@ -47,17 +47,17 @@ func (self *ClientPool) SendMany(keys []string, packet []byte) {
 }
 
 func (self *ClientPool) SendAll(packet []byte) {
-	self.Clients.Range(func(k, v interface{}) bool {
+	self.clients.Range(func(k, v interface{}) bool {
 		v.(*Client).Sendch <- packet
 		return true
 	})
 }
 
 func (self *ClientPool) CloseOne(key string) bool {
-	v, hit := self.Clients.Load(key)
+	v, hit := self.clients.Load(key)
 	if hit {
 		close(v.(*Client).Sendch)
-		self.Clients.Delete(key)
+		self.clients.Delete(key)
 	}
 	return hit
 }
@@ -69,11 +69,11 @@ func (self *ClientPool) CloseMany(keys []string) {
 }
 
 func (self *ClientPool) CloseAll() {
-	self.Clients.Range(func(k, v interface{}) bool {
+	self.clients.Range(func(k, v interface{}) bool {
 		close(v.(*Client).Sendch)
 		return true
 	})
-	self.Clients = new(sync.Map)
+	self.clients = new(sync.Map)
 }
 
 var initacceptedclientpoolonce sync.Once
