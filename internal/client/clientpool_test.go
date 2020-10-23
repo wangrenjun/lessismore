@@ -48,7 +48,9 @@ func TestClientPool(t *testing.T) {
 	if client.ClientPoolUnacceptedToAccepted("1", "new1") != nil {
 		t.Fatal("ClientPoolUnacceptedToAccepted")
 	}
-
+	if client.UnacceptedClientPoolInstance().Exist("1") {
+		t.Fatal("Exist")
+	}
 	if !client.AcceptedClientPoolInstance().Exist("new1") {
 		t.Fatal("Exist")
 	}
