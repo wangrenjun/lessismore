@@ -16,7 +16,7 @@ func TestConfigs(t *testing.T) {
 }
 
 func TestLoadDotenv(t *testing.T) {
-	config.Args.DotEnvFile = "D:\\goworkspace\\src\\lessismore\\configs\\lessismore.env.dev"
+	config.Args.DotEnvFile = "./configs/lessismore.env"
 	err := config.LoadDotenv()
 	if err != nil {
 		t.Fatalf("LoadDotenv: %v", err)

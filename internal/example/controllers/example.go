@@ -2,31 +2,24 @@ package controllers
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/wangrenjun/lessismore/internal/config"
 
 	"github.com/wangrenjun/lessismore/internal/client"
-	"github.com/wangrenjun/lessismore/internal/example"
 	"github.com/wangrenjun/lessismore/internal/pack"
 	"github.com/wangrenjun/lessismore/pkg/codes"
 )
 
-func init() {
-	example.ExampleIdRouterInstance().HandleFunc(10, login)
-	example.ExampleIdRouterInstance().HandleFunc(11, echo)
-	example.ExampleIdRouterInstance().HandleFunc(12, getsession)
-	example.ExampleIdRouterInstance().HandleFunc(13, send)
-	example.ExampleIdRouterInstance().HandleFunc(14, multicast)
-	example.ExampleIdRouterInstance().HandleFunc(15, broadcast)
-}
+var MyPath = "/example"
 
 func beforeClose(c *client.Client) {
 	c.Logger().Info().Msg("This client will close")
 }
 
-func login(c *client.Client, packet []byte) bool {
+func Login(c *client.Client, packet []byte) bool {
 	if c.IsAccepted() {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_OK, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_OK, nil)
 		c.Sendch <- rep
 		return true
 	}
@@ -39,12 +32,12 @@ func login(c *client.Client, packet []byte) bool {
 		Token     string
 	}{}
 	if err := json.Unmarshal(packet, &req); err != nil {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_MALFORMED_MESSAGE, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_MALFORMED_MESSAGE, nil)
 		c.Sendch <- rep
 		return true
 	}
 	if req.Token != "HELLO" {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_TOKEN_MISMATCH, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_TOKEN_MISMATCH, nil)
 		c.Sendch <- rep
 		return true
 	}
@@ -54,11 +47,11 @@ func login(c *client.Client, packet []byte) bool {
 		if config.Configs.DeployEnv == "dev" {
 			c.Logger().Panic().Msg("WTF!")
 		}
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_SERVER_ERROR, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_SERVER_ERROR, nil)
 		c.Sendch <- rep
 		return true
 	}
-	ss := example.NewExampleSession(new)
+	ss := NewExampleSession(new)
 	ss.UserId = req.UserId
 	ss.UserName = req.UserName
 	ss.Photo = req.Photo
@@ -82,7 +75,7 @@ func login(c *client.Client, packet []byte) bool {
 	return true
 }
 
-func echo(c *client.Client, packet []byte) bool {
+func Echo(c *client.Client, packet []byte) bool {
 	req := &struct {
 		Path      string
 		MessageId string
@@ -90,7 +83,7 @@ func echo(c *client.Client, packet []byte) bool {
 		Message   string
 	}{}
 	if err := json.Unmarshal(packet, &req); err != nil {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_MALFORMED_MESSAGE, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_MALFORMED_MESSAGE, nil)
 		c.Sendch <- rep
 		return true
 	}
@@ -110,13 +103,13 @@ func echo(c *client.Client, packet []byte) bool {
 	return true
 }
 
-func getsession(c *client.Client, packet []byte) bool {
-	resp, _ := json.Marshal(c.Session().(example.ExampleSession))
+func Getsession(c *client.Client, packet []byte) bool {
+	resp, _ := json.Marshal(c.Session().(ExampleSession))
 	c.Sendch <- resp
 	return true
 }
 
-func send(c *client.Client, packet []byte) bool {
+func Send(c *client.Client, packet []byte) bool {
 	req := &struct {
 		Path       string
 		MessageId  string
@@ -125,7 +118,7 @@ func send(c *client.Client, packet []byte) bool {
 		Message    string
 	}{}
 	if err := json.Unmarshal(packet, &req); err != nil {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_MALFORMED_MESSAGE, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_MALFORMED_MESSAGE, nil)
 		c.Sendch <- rep
 		return true
 	}
@@ -133,7 +126,7 @@ func send(c *client.Client, packet []byte) bool {
 	return true
 }
 
-func multicast(c *client.Client, packet []byte) bool {
+func Multicast(c *client.Client, packet []byte) bool {
 	req := &struct {
 		Path       string
 		MessageId  string
@@ -142,7 +135,7 @@ func multicast(c *client.Client, packet []byte) bool {
 		Message    string
 	}{}
 	if err := json.Unmarshal(packet, &req); err != nil {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_MALFORMED_MESSAGE, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_MALFORMED_MESSAGE, nil)
 		c.Sendch <- rep
 		return true
 	}
@@ -150,7 +143,7 @@ func multicast(c *client.Client, packet []byte) bool {
 	return true
 }
 
-func broadcast(c *client.Client, packet []byte) bool {
+func Broadcast(c *client.Client, packet []byte) bool {
 	req := &struct {
 		Path       string
 		MessageId  string
@@ -158,10 +151,30 @@ func broadcast(c *client.Client, packet []byte) bool {
 		Message    string
 	}{}
 	if err := json.Unmarshal(packet, &req); err != nil {
-		rep, _ := pack.PackReply(example.MyPath, codes.RC_MALFORMED_MESSAGE, nil)
+		rep, _ := pack.PackReply(MyPath, codes.RC_MALFORMED_MESSAGE, nil)
 		c.Sendch <- rep
 		return true
 	}
 	client.AcceptedClientPoolInstance().SendAll(packet)
 	return true
+}
+
+type ExampleSession struct {
+	id       string
+	created  time.Time
+	UserId   string
+	UserName string
+	Photo    string
+}
+
+func NewExampleSession(id string) *ExampleSession {
+	return &ExampleSession{id: id, created: time.Now()}
+}
+
+func (self ExampleSession) Id() string {
+	return self.id
+}
+
+func (self ExampleSession) Created() time.Time {
+	return self.created
 }

@@ -11,7 +11,7 @@ import (
 func TestLog(t *testing.T) {
 	config.Configs.Log.Level = "info"
 	config.Configs.Log.File = "test.log"
-	config.Configs.Log.Dir = "D:\\goworkspace\\src\\lessismore"
+	config.Configs.Log.Dir = "./"
 	config.Configs.Log.MaxBackups = 3
 	config.Configs.Log.MaxSize = 1024
 	config.Configs.Log.MaxAge = 30

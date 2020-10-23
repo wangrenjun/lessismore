@@ -13,7 +13,7 @@ type Packet struct {
 }
 
 func Field(packet []byte, name string) (string, bool) {
-	r := gjson.Get(string(packet), "Path")
+	r := gjson.Get(string(packet), name)
 	return r.String(), r.Exists()
 }
 

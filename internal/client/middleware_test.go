@@ -68,3 +68,25 @@ func TestMiddleware(t *testing.T) {
 		t.Fatal("Dispatch")
 	}
 }
+
+func TestMiddleware2(t *testing.T) {
+	tt = t
+	client.IdRouterInstance().MiddleWareUse(middlewareA)
+	client.IdRouterInstance().MiddleWareUse(middlewareB)
+	client.IdRouterInstance().MiddleWareUse(middlewareC)
+	client.IdRouterInstance().HandleFunc(100, module1handler)
+	client.IdRouterInstance().HandleFunc(110, module2handler)
+	client.IdRouterInstance().HandleFunc(120, module3handler)
+	if !client.IdRouterInstance().Dispatch(100, nil, nil) {
+		t.Fatal("Dispatch")
+	}
+	if !client.IdRouterInstance().Dispatch(110, nil, nil) {
+		t.Fatal("Dispatch")
+	}
+	if !client.IdRouterInstance().Dispatch(120, nil, nil) {
+		t.Fatal("Dispatch")
+	}
+	if client.IdRouterInstance().Dispatch(130, nil, nil) {
+		t.Fatal("Dispatch")
+	}
+}

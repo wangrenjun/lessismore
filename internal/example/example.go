@@ -2,7 +2,8 @@ package example
 
 import (
 	"strconv"
-	"sync"
+
+	"github.com/wangrenjun/lessismore/internal/example/controllers"
 
 	"github.com/wangrenjun/lessismore/pkg/codes"
 
@@ -12,6 +13,14 @@ import (
 
 func init() {
 	client.PathRouterInstance().HandleFunc(MyPath, dispatch)
+
+	exampleRouter = client.NewIdRouter()
+	exampleRouter.HandleFunc(10, controllers.Login)
+	exampleRouter.HandleFunc(11, controllers.Echo)
+	exampleRouter.HandleFunc(12, controllers.Getsession)
+	exampleRouter.HandleFunc(13, controllers.Send)
+	exampleRouter.HandleFunc(14, controllers.Multicast)
+	exampleRouter.HandleFunc(15, controllers.Broadcast)
 }
 
 var MyPath = "/example"
@@ -29,7 +38,7 @@ func dispatch(c *client.Client, packet []byte) bool {
 		c.Sendch <- rep
 		return true
 	}
-	if !ExampleIdRouterInstance().Dispatch(msgid, c, packet) {
+	if !exampleRouter.Dispatch(msgid, c, packet) {
 		rep, _ := pack.PackReply(MyPath, codes.RC_MESSAGE_UNDEFINED, nil)
 		c.Sendch <- rep
 		return true
@@ -37,12 +46,4 @@ func dispatch(c *client.Client, packet []byte) bool {
 	return true
 }
 
-var initexampleidrouteronce sync.Once
-var exampleidrouter *client.IdRouter
-
-func ExampleIdRouterInstance() *client.IdRouter {
-	initexampleidrouteronce.Do(func() {
-		exampleidrouter = client.NewIdRouter()
-	})
-	return exampleidrouter
-}
+var exampleRouter *client.IdRouter

@@ -20,6 +20,11 @@ func TestPack(t *testing.T) {
 	}
 	t.Logf("path: %s", path)
 
+	fields := pack.Fields([]byte(h), "Path", "MessageId", "From", "WTFF", "")
+	for _, f := range fields {
+		t.Logf("Fields: %s", f)
+	}
+
 	rep, err := pack.PackReply("/example2", codes.RC_MALFORMED_MESSAGE, nil)
 	if err != nil {
 		t.Fatalf("PackReply: %v", err)
