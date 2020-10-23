@@ -29,7 +29,7 @@ func dispatch(c *client.Client, packet []byte) bool {
 		c.Sendch <- rep
 		return true
 	}
-	if !IdRouterInstance().Dispatch(msgid, c, packet) {
+	if !ExampleIdRouterInstance().Dispatch(msgid, c, packet) {
 		rep, _ := pack.PackReply(MyPath, codes.RC_MESSAGE_UNDEFINED, nil)
 		c.Sendch <- rep
 		return true
@@ -40,7 +40,7 @@ func dispatch(c *client.Client, packet []byte) bool {
 var initexampleidrouteronce sync.Once
 var exampleidrouter *client.IdRouter
 
-func IdRouterInstance() *client.IdRouter {
+func ExampleIdRouterInstance() *client.IdRouter {
 	initexampleidrouteronce.Do(func() {
 		exampleidrouter = client.NewIdRouter()
 	})

@@ -12,12 +12,12 @@ import (
 )
 
 func init() {
-	example.IdRouterInstance().HandleFunc(10, login)
-	example.IdRouterInstance().HandleFunc(11, echo)
-	example.IdRouterInstance().HandleFunc(12, getsession)
-	example.IdRouterInstance().HandleFunc(13, send)
-	example.IdRouterInstance().HandleFunc(14, multicast)
-	example.IdRouterInstance().HandleFunc(15, broadcast)
+	example.ExampleIdRouterInstance().HandleFunc(10, login)
+	example.ExampleIdRouterInstance().HandleFunc(11, echo)
+	example.ExampleIdRouterInstance().HandleFunc(12, getsession)
+	example.ExampleIdRouterInstance().HandleFunc(13, send)
+	example.ExampleIdRouterInstance().HandleFunc(14, multicast)
+	example.ExampleIdRouterInstance().HandleFunc(15, broadcast)
 }
 
 func beforeClose(c *client.Client) {
