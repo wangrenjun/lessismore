@@ -63,7 +63,7 @@ func dump() {
 	c.Printf("REDIS_HOST:                %s\n", os.Getenv("REDIS_HOST"))
 	c.Printf("REDIS_PORT:                %s\n", os.Getenv("REDIS_PORT"))
 	client.PathRouterInstance().Range(func(pattern string, handler client.WsHandlerFunc) {
-		color.New(color.Bold, color.FgYellow).Printf("Registered handler:        ModuleId: %s, Handler: %s\n", pattern, utils.GetFunctionName(handler))
+		color.New(color.Bold, color.FgYellow).Printf("Registered handler:        Path: %s, Handler: %s\n", pattern, utils.GetFunctionName(handler))
 	})
 }
 
