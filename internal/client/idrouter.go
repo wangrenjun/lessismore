@@ -1,8 +1,6 @@
 package client
 
 import (
-	"sync"
-
 	"github.com/wangrenjun/lessismore/internal/log"
 )
 
@@ -39,14 +37,4 @@ func (self IdRouter) Range(cb func(int, WsHandlerFunc)) {
 	for id, handler := range self.handlers {
 		cb(id, handler)
 	}
-}
-
-var initidrouteronce sync.Once
-var idrouter *IdRouter
-
-func IdRouterInstance() *IdRouter {
-	initidrouteronce.Do(func() {
-		idrouter = NewIdRouter()
-	})
-	return idrouter
 }

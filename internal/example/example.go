@@ -2,6 +2,7 @@ package example
 
 import (
 	"strconv"
+	"sync"
 
 	"github.com/wangrenjun/lessismore/pkg/codes"
 
@@ -28,10 +29,20 @@ func dispatch(c *client.Client, packet []byte) bool {
 		c.Sendch <- rep
 		return true
 	}
-	if !client.IdRouterInstance().Dispatch(msgid, c, packet) {
+	if !IdRouterInstance().Dispatch(msgid, c, packet) {
 		rep, _ := pack.PackReply(MyPath, codes.RC_MESSAGE_UNDEFINED, nil)
 		c.Sendch <- rep
 		return true
 	}
 	return true
+}
+
+var initexampleidrouteronce sync.Once
+var exampleidrouter *client.IdRouter
+
+func IdRouterInstance() *client.IdRouter {
+	initexampleidrouteronce.Do(func() {
+		exampleidrouter = client.NewIdRouter()
+	})
+	return exampleidrouter
 }
