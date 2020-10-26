@@ -2,16 +2,22 @@ package client
 
 import (
 	"sync"
+	"sync/atomic"
 )
 
 type ClientPool struct {
 	clients *sync.Map
+	num     uint64
 }
 
 func NewClientPool() *ClientPool {
 	return &ClientPool{
 		clients: new(sync.Map),
 	}
+}
+
+func (self *ClientPool) Num() uint64 {
+	return atomic.LoadUint64(&self.num)
 }
 
 func (self *ClientPool) Exist(key string) bool {
@@ -21,6 +27,7 @@ func (self *ClientPool) Exist(key string) bool {
 
 func (self *ClientPool) Push(key string, c *Client) {
 	self.clients.Store(key, c)
+	atomic.AddUint64(&self.num, 1)
 }
 
 func (self *ClientPool) Pull(key string) (c *Client, hit bool) {
@@ -28,6 +35,8 @@ func (self *ClientPool) Pull(key string) (c *Client, hit bool) {
 	if hit {
 		self.clients.Delete(key)
 		c = v.(*Client)
+		n := uint64(1)
+		atomic.AddUint64(&self.num, -n)
 	}
 	return
 }
@@ -58,6 +67,8 @@ func (self *ClientPool) CloseOne(key string) bool {
 	if hit {
 		close(v.(*Client).Sendch)
 		self.clients.Delete(key)
+		n := uint64(1)
+		atomic.AddUint64(&self.num, -n)
 	}
 	return hit
 }
@@ -74,6 +85,7 @@ func (self *ClientPool) CloseAll() {
 		return true
 	})
 	self.clients = new(sync.Map)
+	atomic.StoreUint64(&self.num, 0)
 }
 
 var initacceptedclientpoolonce sync.Once

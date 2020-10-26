@@ -19,10 +19,17 @@ func TestClientPool(t *testing.T) {
 	d := client.NewClient(nil)
 	d.Accepted(false)
 	d.SetSession(client.NewTemporarySession("d"))
+
+	if client.UnacceptedClientPoolInstance().Num() != 0 {
+		t.Fatalf("Num")
+	}
 	client.UnacceptedClientPoolInstance().Push("1", a)
 	client.UnacceptedClientPoolInstance().Push("2", b)
 	client.UnacceptedClientPoolInstance().Push("3", c)
 	client.UnacceptedClientPoolInstance().Push("4", d)
+	if client.UnacceptedClientPoolInstance().Num() != 4 {
+		t.Fatalf("Num")
+	}
 
 	if !client.UnacceptedClientPoolInstance().Exist("1") {
 		t.Fatal("Exist")
@@ -41,12 +48,21 @@ func TestClientPool(t *testing.T) {
 	if client.UnacceptedClientPoolInstance().Exist("4") {
 		t.Fatal("Exist")
 	}
+	if client.UnacceptedClientPoolInstance().Num() != 3 {
+		t.Fatalf("Num")
+	}
 
 	if client.ClientPoolUnacceptedToAccepted("1", "new1") != a {
 		t.Fatal("ClientPoolUnacceptedToAccepted")
 	}
+	if client.UnacceptedClientPoolInstance().Num() != 2 {
+		t.Fatalf("Num")
+	}
 	if client.ClientPoolUnacceptedToAccepted("1", "new1") != nil {
 		t.Fatal("ClientPoolUnacceptedToAccepted")
+	}
+	if client.AcceptedClientPoolInstance().Num() != 1 {
+		t.Fatalf("Num")
 	}
 	if client.UnacceptedClientPoolInstance().Exist("1") {
 		t.Fatal("Exist")
@@ -62,4 +78,9 @@ func TestClientPool(t *testing.T) {
 	if client.AcceptedClientPoolInstance().Exist("xxxxxxasfdasdfsaaaa") {
 		t.Fatal("Exist")
 	}
+	client.UnacceptedClientPoolInstance().CloseAll()
+	if client.UnacceptedClientPoolInstance().Num() != 0 {
+		t.Fatalf("Num")
+	}
+
 }
