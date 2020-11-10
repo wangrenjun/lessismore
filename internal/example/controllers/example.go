@@ -51,7 +51,7 @@ func Login(c *client.Client, packet []byte) bool {
 		c.Sendch <- rep
 		return true
 	}
-	ss := NewExampleSession(new)
+	ss := NewExampleSession(req.UserId)
 	ss.UserId = req.UserId
 	ss.UserName = req.UserName
 	ss.Photo = req.Photo

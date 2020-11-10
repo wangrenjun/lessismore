@@ -1,18 +1,23 @@
 package client
 
 import (
+	"expvar"
 	"sync"
 	"sync/atomic"
 )
 
 type ClientPool struct {
-	clients *sync.Map
-	num     uint64
+	clients     *sync.Map
+	num         uint64
+	numClient   *expvar.Int
+	totalClient *expvar.Int
 }
 
-func NewClientPool() *ClientPool {
+func NewClientPool(n *expvar.Int, t *expvar.Int) *ClientPool {
 	return &ClientPool{
-		clients: new(sync.Map),
+		clients:     new(sync.Map),
+		numClient:   n,
+		totalClient: t,
 	}
 }
 
@@ -28,6 +33,8 @@ func (self *ClientPool) Exist(key string) bool {
 func (self *ClientPool) Push(key string, c *Client) {
 	self.clients.Store(key, c)
 	atomic.AddUint64(&self.num, 1)
+	self.numClient.Add(1)
+	self.totalClient.Add(1)
 }
 
 func (self *ClientPool) Pull(key string) (c *Client, hit bool) {
@@ -37,6 +44,7 @@ func (self *ClientPool) Pull(key string) (c *Client, hit bool) {
 		c = v.(*Client)
 		n := uint64(1)
 		atomic.AddUint64(&self.num, -n)
+		self.numClient.Add(-1)
 	}
 	return
 }
@@ -65,10 +73,12 @@ func (self *ClientPool) SendAll(packet []byte) {
 func (self *ClientPool) CloseOne(key string) bool {
 	v, hit := self.clients.Load(key)
 	if hit {
-		close(v.(*Client).Sendch)
+		c := v.(*Client)
+		close(c.Sendch)
 		self.clients.Delete(key)
 		n := uint64(1)
 		atomic.AddUint64(&self.num, -n)
+		self.numClient.Add(-1)
 	}
 	return hit
 }
@@ -86,6 +96,7 @@ func (self *ClientPool) CloseAll() {
 	})
 	self.clients = new(sync.Map)
 	atomic.StoreUint64(&self.num, 0)
+	self.numClient.Set(0)
 }
 
 var initacceptedclientpoolonce sync.Once
@@ -93,7 +104,7 @@ var acceptedclientpool *ClientPool
 
 func AcceptedClientPoolInstance() *ClientPool {
 	initacceptedclientpoolonce.Do(func() {
-		acceptedclientpool = NewClientPool()
+		acceptedclientpool = NewClientPool(expvar.NewInt("NumAcceptedClient"), expvar.NewInt("TotalAcceptedClient"))
 	})
 	return acceptedclientpool
 }
@@ -103,7 +114,7 @@ var unacceptedclientpool *ClientPool
 
 func UnacceptedClientPoolInstance() *ClientPool {
 	initunacceptedclientpoolonce.Do(func() {
-		unacceptedclientpool = NewClientPool()
+		unacceptedclientpool = NewClientPool(expvar.NewInt("NumUnacceptedClient"), expvar.NewInt("TotalUnacceptedClient"))
 	})
 	return unacceptedclientpool
 }

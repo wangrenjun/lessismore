@@ -1,6 +1,7 @@
 package client
 
 import (
+	_ "expvar"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
